@@ -10,63 +10,11 @@ from django.template import loader
 from django.urls import reverse
 from .models import *
 import numpy as np
-from stl import mesh
 import io
-from matplotlib import pyplot
-import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
-from mpl_toolkits.mplot3d import axes3d
-from mpl_toolkits.mplot3d import proj3d
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-import base64
 import random
 import datetime
 from .utils import *
 from django.contrib.auth.models import User
-def ger_refeer():
-    figure = Figure()
-    axes = mplot3d.Axes3D(figure)
-    # Define the 8 vertices of the cube
-    vertices = np.array([\
-        [-1, -1, -1],
-        [+1, -1, -1],
-        [+1, +1, -1],
-        [-1, +1, -1],
-        [-1, -1, +1],
-        [+1, -1, +1],
-        [+1, +1, +1],
-        [-1, +1, +1]])
-    # Define the 12 triangles composing the cube
-    faces = np.array([\
-        [0,3,1],
-        [1,3,2],
-        [0,4,7],
-        [0,7,3],
-        [4,5,6],
-        [4,6,7],
-        [5,1,2],
-        [5,2,6],
-        [2,3,6],
-        [3,7,6],
-        [0,1,5],
-        [0,5,4]])
-
-    # Create the mesh
-    cube = mesh.Mesh(np.zeros(faces.shape[0], dtype=mesh.Mesh.dtype))
-    for i, f in enumerate(faces):
-        for j in range(3):
-            cube.vectors[i][j] = vertices[f[j],:]
-    your_mesh = cube
-    axes.add_collection3d(mplot3d.art3d.Poly3DCollection(your_mesh.vectors))
-    scale = your_mesh.points.flatten()
-    axes.auto_scale_xyz(scale, scale, scale)
-    output = io.BytesIO()
-    canvas = FigureCanvas(figure)
-    canvas.print_png(output)
-    img_str = base64.b64encode(output.getvalue())
-    data_url = 'data:image/jpg;base64,' + base64.b64encode(output.getvalue()).decode()
-    return data_url
 
 @login_required(login_url="/login/")
 def index(request):
@@ -74,7 +22,6 @@ def index(request):
     context['fecha_actual'] = get_fecha_actual()
     context['alarmas'] = get_my_homework()
     print(context['alarmas'])
-    context['image']=ger_refeer()
     context['refeers'] = Refeer.objects.all()
     context['ac'] = AlarmaContacto.objects.filter(id_user=request.user).all()
     html_template = loader.get_template('home/index.html')
