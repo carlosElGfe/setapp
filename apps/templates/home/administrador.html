@@ -1,0 +1,311 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Dashboard {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Creador de graficos</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {%csrf_token%}
+                    <input hidden value="grafico"name="grafico">
+                    <button type="button" class="btn btn-sm btn-icon-only btn-rounded btn-outline-secondary mb-0 ms-2 btn-sm d-flex align-items-center justify-content-center ms-3" data-bs-toggle="tooltip" data-bs-placement="bottom" title="" data-bs-original-title="Ingresar los parametros para consultas la base de datos.">
+                        <i class="fas fa-info" aria-hidden="true"></i></button>
+                        <script>
+                            function myFunction(e) {
+                            document.getElementById("myText").value = e.target.value
+                            }
+                        </script>
+
+                    Tipo de grafico
+                    <select name="tipo_grafico" class="form-control" onchange="myFunction(event)">
+                        <option value="HORAS">Por Hora</option>
+                        <option value="DIAS">Por Dia</option>
+                    </select>
+                    <br>
+                    Dias / horas en el grafico
+                    <input type="number" required id="num17" class="form-control" name="entries" value="0">
+                    <script>
+                        function myFunctionentries(e) {
+                        document.getElementById("entries").value = e.target.value
+                        }
+                    </script>
+                    Seleccione el refeer
+                    <select name="refeer" id="refeer"required  onchange="myFunction2(event)" class="form-control">
+                        {% for r in refeers %}
+                        <option value="{{r.id_refeer}}">{{r.id_refeer}}</option>
+                        {% endfor %}
+                    </select>
+                    <script>
+                        function myFunction2(e) {
+                        document.getElementById("ref").value = "Refeer #"+ e.target.value
+                        }
+                    </script>
+                    
+            </div>
+        </div>
+        
+    </div>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Reporte</h3>
+                <div style="padding:10px;border-color: black;background-color:gray">
+                <input id="myText" value="HORAS" class="form-control" disabled>
+                <input id="entries" value="Ultimas 0 Entradas" class="form-control" disabled>
+                <input id="ref" value="Refeer #1" class="form-control" disabled>
+                <div class="text-center" style="margin-top:20px">
+                <button class="btn btn-info">Solicitar Informe</button></div>
+            </div>
+            </form>
+            </div>
+            <div class="card-body">
+                <div class="chart">
+                        
+                    <canvas id="chart-line2" class="chart-canvas" height="300"></canvas>
+                  </div>
+                <div class="table-responsive">
+                    <table class="table table-flush" id="datatable-search">
+                      <thead class="thead-light">
+                        <tr>
+                          <th>#</th>
+                          <th>Sensor</th>
+                          <th>Lectura</th>
+                          <th>Fecha-Tiempo</th>
+                          <th>Refeer</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                          {%for lectura in lecturas%}
+                          <tr>
+                            <td>{{lectura.id_lecturarefeer}}</td>
+                            <td>{{lectura.sensor}}</td>
+                            <td>{{lectura.lectura}}º</td>
+                            <td>{{lectura.created}}</td>
+                            <td>{{lectura.id_refeer.id_refeer}}</td>
+                          </tr>
+                          {%endfor%}
+                      </tbody>
+                      </table>
+                      </div>
+                      <button class="btn btn-secondary">Descargar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "includes/footer.html" %}
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+<script>
+    var msg2 = document.getElementById('num17');
+  
+  msg2.addEventListener('keyup', function(e) {
+    var msg = document.getElementById('entries');
+    msg.value = "Ultimas " + msg2.value + " Entradas";
+  });
+
+  </script>
+  <script src="/static/assets/js/plugins/datatables.js"></script>
+  <script>
+    const dataTableBasic = new simpleDatatables.DataTable("#datatable-basic", {
+      searchable: true,
+      fixedHeight: true
+    });
+  </script>
+  <script src="/static/assets/js/plugins/chartjs.min.js"></script>
+
+<script>
+    var ctx3 = document.getElementById("chart-line2").getContext("2d");
+    var gradientStroke1 = ctx3.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
+    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+var gradientStroke2 = ctx3.createLinearGradient(0, 230, 0, 50);
+
+var gradientStroke3 = ctx3.createLinearGradient(0, 230, 0, 50);
+
+gradientStroke3.addColorStop(1, 'rgba(203,12,159,0.2)');
+gradientStroke3.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+gradientStroke3.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+
+var gradientStroke4 = ctx3.createLinearGradient(0, 230, 0, 50);
+
+gradientStroke4.addColorStop(1, 'rgba(20,23,39,0.2)');
+gradientStroke4.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+gradientStroke4.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+
+new Chart(ctx3, {
+  type: "line",
+  data: {
+    labels:  [{%for t in tiempos%}"{{t}}",{%endfor%}],
+    datasets: [
+    {
+        label: "Promedio refeer sustrato",
+        tension: 0.4,
+        borderWidth: 0,
+        pointRadius: 0,
+        borderColor: "#000000",
+        borderWidth: 3,
+        backgroundColor: gradientStroke2,
+        fill: true,
+        data: [{%for a in avg%}{{a}},{%endfor%}],
+        maxBarThickness: 6
+      },
+      {
+        label: "Promedio refeer aire",
+        tension: 0.4,
+        borderWidth: 0,
+        pointRadius: 0,
+        borderColor: "#000000",
+        borderWidth: 3,
+        backgroundColor: gradientStroke2,
+        fill: true,
+        data: [{%for a in avg2%}{{a}},{%endfor%}],
+        maxBarThickness: 6
+      },   
+    {
+        label: "Zona 1 Aire",
+        tension: 0.4,
+        borderWidth: 0,
+        pointRadius: 0,
+        borderColor: "#6f4e37",
+        borderWidth: 3,
+        backgroundColor: gradientStroke1,
+        fill: true,
+        data: [{%for a in L1%}{{a}},{%endfor%}],
+        maxBarThickness: 6
+      },
+      {
+        label: "Zona 2 Aire",
+        tension: 0.4,
+        borderWidth: 0,
+        pointRadius: 0,
+        borderColor: "#A569BD",
+        borderWidth: 3,
+        backgroundColor: gradientStroke1,
+        fill: true,
+        data: [{%for a in L2%}{{a}},{%endfor%}],
+        maxBarThickness: 6
+      },
+      {
+        label: "Zona 3 Sustrato",
+        tension: 0.4,
+        borderWidth: 0,
+        pointRadius: 0,
+        borderColor: "#F7464A",
+        borderWidth: 3,
+        backgroundColor: gradientStroke1,
+        fill: true,
+        data: [{%for a in L3%}{{a}},{%endfor%}],
+        maxBarThickness: 6
+      },
+      {
+        label: "Zona 4 Sustrato",
+        tension: 0.4,
+        borderWidth: 0,
+        pointRadius: 0,
+        borderColor: "#46BFBD",
+        borderWidth: 3,
+        backgroundColor: gradientStroke1,
+        fill: true,
+        data: [{%for a in L4%}{{a}},{%endfor%}],
+        maxBarThickness: 6
+      },
+      {
+        label: "Zona 5 Sustrato",
+        tension: 0.4,
+        borderWidth: 0,
+        pointRadius: 0,
+        borderColor: "#FEDCBA",
+        borderWidth: 3,
+        backgroundColor: gradientStroke2,
+        fill: true,
+        data: [{%for a in L5%}{{a}},{%endfor%}],
+        maxBarThickness: 6
+      },
+      {
+        label: "Zona 6 Sustrato",
+        tension: 0.4,
+        borderWidth: 0,
+        pointRadius: 0,
+        borderColor: "#b2b9bf",
+        borderWidth: 3,
+        backgroundColor: gradientStroke2,
+        fill: true,
+        data: [{%for a in L6%}{{a}},{%endfor%}],
+        maxBarThickness: 6
+      },
+      
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index',
+    },
+    scales: {
+      y: {
+        grid: {
+          drawBorder: false,
+          display: true,
+          drawOnChartArea: true,
+          drawTicks: false,
+          borderDash: [5, 5]
+        },
+        ticks: {
+          display: true,
+          padding: 10,
+          color: '#b2b9bf',
+          font: {
+            size: 11,
+            family: "Open Sans",
+            style: 'normal',
+            lineHeight: 2
+          },
+        }
+      },
+      x: {
+        grid: {
+          drawBorder: false,
+          display: false,
+          drawOnChartArea: false,
+          drawTicks: false,
+          borderDash: [5, 5]
+        },
+        ticks: {
+          display: true,
+          color: '#b2b9bf',
+          padding: 20,
+          font: {
+            size: 11,
+            family: "Open Sans",
+            style: 'normal',
+            lineHeight: 2
+          },
+        }
+      },
+    },
+  },
+});
+</script>
+{% endblock javascripts %}

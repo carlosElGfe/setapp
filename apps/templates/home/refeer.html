@@ -1,0 +1,801 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Dashboard {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+
+{% block content %}
+
+    <div class="container-fluid py-4">
+<div class="row">
+    <div class="col-sm">
+        <div class="card h-100">
+            <div class="card-header">
+                <h3>Refeer Nº {{refeer.id_refeer}}</h3>
+                <p class="card-description mb-4">
+                    Ultima medición- 5-05-2022 09:21:00
+                  </p>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <ul>
+                            <li class="list-group-item justify-content-between align-items-center" >Zona 1:<span class="badge badge-success badge-pill"style="font-size:18px">{{lectura_1}}º</span></li>
+                            <li class="list-group-item">Zona 2: <span class="badge badge-success badge-pill" style="font-size:18px">{{lectura_2}}º</span></li>
+                            <li class="list-group-item">Zona 3: <span class="badge badge-success badge-pill"style="font-size:18px">{{lectura_3}}º</span></li>
+                            <li class="list-group-item">Zona 4: <span class="badge badge-success badge-pill"style="font-size:18px">{{lectura_6}}º</span></li>
+                        </ul>
+                    </div>
+                    <div class="col-sm-6">
+                        <ul>
+                            <li class="list-group-item">Zona 1: <span class="badge badge-info badge-pill"style="font-size:18px">{{lectura_4}}º</span></li>
+                            <li class="list-group-item">Zona 2: <span class="badge badge-info badge-pill"style="font-size:18px">{{lectura_5}}º</span></li>
+                        </ul>
+                </div>
+            </div>
+            <a class="badge badge-info badge-pill" style="font-size:18px;text-color:white" data-bs-toggle="collapse" href="#collapseCiclos" role="button" aria-expanded="false" aria-controls="collapseCiclos">
+              <div style="color:white">Crear Ciclos</div>
+            </a>
+            <a class="badge badge-info badge-pill" style="font-size:18px;text-color:white" data-bs-toggle="collapse" href="#collapseSubCiclos" role="button" aria-expanded="false" aria-controls="collapseSubCiclos">
+              <div style="color:white">Crear SubCiclo</div>
+            </a>
+            <a class="badge badge-info badge-pill" style="font-size:18px;text-color:white" data-bs-toggle="collapse" href="#collapseContactos" role="button" aria-expanded="false" aria-controls="collapseContactos">
+              <div style="color:white">Editar Ciclo</div>
+            </a>
+            <a class="badge badge-primary badge-pill" style="font-size:18px;text-color:white" data-bs-toggle="collapse" href="#collapseContactos" role="button" aria-expanded="false" aria-controls="collapseContactos">
+              <div style="color:white">Lecturas anteriores</div>
+            </a>
+            <div class="collapse" id="collapseCiclos">
+              <div class="card">
+                <div class="card-header">
+                <h3 class="text-center">
+                  Crear ciclo
+                </h3>
+                </div>
+                <div class="card-body">
+                  <form method="POST">
+                    <p>{%csrf_token%}
+                      <label for="amount">Temperaturas</label>
+                      <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;" name="temp_ciclo">
+                    </p>
+                    <div id="slider-range"></div>
+                    {%csrf_token%}
+                    <input hidden name="ciclo" value="ciclo">
+                    Inicio-Fin del ciclo
+                    <input class="form-control datepicker" placeholder="Rango de fechas en donde esta activa la alarma" type="text" onfocus="focused(this)" onfocusout="defocused(this)" name="fecha_ciclo">
+                    Fin del SubCiclo
+                    <input class="form-control" type="date" name="fin_subciclo">
+                    Observación
+                    <input type="text"name="obs" class="form-control" placeholder="Agregar observación">
+                    <button class="btn btn-success">Crear ciclo</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="collapse" id="collapseSubCiclos">
+              <div class="card">
+                <div class="card-header">
+                <h3 class="text-center">
+                  Crear Subciclo
+                </h3>
+                </div>
+                <div class="card-body">
+                  <form method="POST">
+                    <p>{%csrf_token%}
+                      <label for="amount">Temperaturas</label>
+                      <input type="text" id="amount2" readonly style="border:0; color:#f6931f; font-weight:bold;" name="temp_ciclo">
+                    </p>
+                    <input hidden name="ciclo_id" value="{{ciclo.id_ciclo}}">
+                    <div id="slider-range"></div>
+                    {%csrf_token%}
+                    <input hidden name="subciclo" value="subciclo">
+                    Inicio-Fin del ciclo
+                    <input class="form-control datepicker" placeholder="Rango de fechas en donde esta activa la alarma" type="text" onfocus="focused(this)" onfocusout="defocused(this)" name="fecha_ciclo">
+                    Observación
+                    <input type="text"name="obs" class="form-control" placeholder="Agregar observación">
+                    <button class="btn btn-success">Crear ciclo</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            
+             
+              
+            <div class="collapse" id="collapseContactos">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Temperatura</th>
+                        <th>Zona</th>
+                        <th>Nº Sensor</th>
+                    </tr>
+                    
+                </thead>
+                <tbody>
+                  {% for l in last_20_lectures %}
+                    <tr>
+                        <td>{{l.lectura}}º</td>
+                        <td>{%if l.es_tierra %}Tierra {%else%}Aire{%endif%}</td>
+                        <td>{{l.sensor}}</td>
+                    </tr>
+                    {%endfor%}
+                </tbody>
+            </table>
+        </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="col-sm">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3>Temperaturas anteriores</h3>
+                </div>
+                <div class="card-body">
+                    <p>Ultimos 15 dias <b>*EJEMPLO*</b></p>
+                    <div class="chart">
+                       
+                        <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
+                      </div>
+                      <p>Ultimas horas <b>*Falta el promedio Aire / Sustrato*</b></p><br>
+                      <form method="POST">
+                        {%csrf_token%}
+                        <input hidden value="hora" name="hora">
+                        Horas en el grafico
+                        <input type="number" class="form-control" name="timeframe" min="0" max="34" style="width:150px">
+                        <button class="btn btn-primary" type="submit">Actualizar</button>
+                      </form>
+                      <div class="chart">
+                        
+                        <canvas id="chart-line2" class="chart-canvas" height="300"></canvas>
+                      </div>
+                      <hr class="horizontal dark my-3">
+
+                      <div class="card">
+                          <div class="card-header"><h5>Crear Alarma</h5></div>
+                      <form method='POST'>
+                          {%csrf_token%}
+                          <input hidden value="alarma" name="alarma">
+                          Temperatura Superior
+                          <input type="number" value="ideal" name="nombre_temp"class="form-control">
+                          Temperatura Inferior
+                          <input type="number" value="inferior" name="inferior"class="form-control">
+                          Descripción
+                          <input type="text" name="descripcion" placeholder="'Incubaciòn'" class="form-control">
+                          Rango de Tiempo
+                          <input class="form-control datepicker" placeholder="Rango de fechas en donde esta activa la alarma" type="text" onfocus="focused(this)" onfocusout="defocused(this)" name="fecha_alarma">
+                          Color
+                          <select name="color_alarma" class="form-control" required>
+                            <option value="primary">Fucsia</option>
+                            <option value="warning">Naranjo</option>
+                            <option value="danger">Rojo</option>
+                            <option value="info">Celeste</option>
+                            <option value="secondary">Gris</option>
+                          </select>
+                          Para notificar<br>
+                          {% for user in users %}
+                          {{user.username}}<input type="checkbox" name="user-{{user.id}}">
+                          {% endfor %}
+                          <br>
+                      <button class="btn btn-primary" type="submite">Crear alarma</button>
+                      </form>
+                    </div>
+                </div>
+                <div class="card">
+                  <div class="card-header">
+                  <h3>Alarma</h3>
+                  </div>
+                  <div class="card-body">
+                    <ul>
+                      <li class="list-group-item">{% if Alarma_activa.on %}<span class="badge badge-success badge-pill">Activada</span>{%else%}<span class="badge badge-success badge-pill">Activada</span>{%endif%}</li>
+                      <li class="list-group-item">Creada por :{{Alarma_activa.id_user.username}}</li>
+                      <li class="list-group-item">Tiempo de activacion :{{Alarma_activa.inicio}} - {{Alarma_activa.fin}}</li>
+                      <li class="list-group-item">Rango temepratura :{{Alarma_activa.treshhold}} - {{Alarma_activa.aire_tierra}}</li>
+                      <li class="list-group-item">Descripción : {{Alarma_activa.desc}}</li>
+                    </ul>
+                  </div>
+                </div>
+                <button class="btn btn-info" data-bs-toggle="collapse" href="#collapseContactos2" role="button" aria-expanded="false" aria-controls="collapseContactos2">Ver Historial de alarmas</button>
+                <div class="collapse" id="collapseContactos2">
+                <ul>
+                {%for a in alarmas_historicas%}
+                <li class="list-group-item justify-content-evenly"> {{a.id_user.username}} -> <span class="badge badge-info badge-pill">{{a.treshhold}}</span> - <span class="badge badge-warning badge-pill">{{a.aire_tierra}}</span> <p>{{a.created}}</p></li>
+                {%endfor%}
+                </ul>
+              </div>
+
+        </div>
+
+    </div>
+</div>
+
+      <img src="{{ image }}" alt=""/>
+
+
+      {% include "includes/footer.html" %}
+
+    </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+
+  <script src="/static/assets/js/plugins/chartjs.min.js"></script>
+  <script src="/static/assets/js/plugins/threejs.js"></script>
+  <script src="/static/assets/js/plugins/orbit-controls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+  <script>
+    if (document.querySelector('.datepicker')) {
+      flatpickr('.datepicker', {
+        mode: "range"
+      });
+    }
+    </script>
+
+  <script>
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrftoken = getCookie('csrftoken');
+console.log(csrftoken);
+  </script>
+  
+  <script>
+    var ctx = document.getElementById("chart-bars");
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["22-4", "23-4", "24-4", "25-4", "26-4", "27-4", "28-4", "29-4", "30-4"],
+        datasets: [{
+          label: "Sales",
+          tension: 0.4,
+          borderWidth: 0,
+          borderRadius: 4,
+          borderSkipped: false,
+          backgroundColor: "#fff",
+          data: [450, 200, 100, 220, 500, 100, 400, 230, 500],
+          maxBarThickness: 6
+        }, ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false,
+            },
+            ticks: {
+              suggestedMin: 0,
+              suggestedMax: 500,
+              beginAtZero: true,
+              padding: 15,
+              font: {
+                size: 14,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+              color: "#fff"
+            },
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false
+            },
+            ticks: {
+              display: false
+            },
+          },
+        },
+      },
+    });
+
+
+    var ctx2 = document.getElementById("chart-line").getContext("2d");
+
+    var gradientStroke1 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke1.addColorStop(1, 'rgba(203,12,159,0.2)');
+    gradientStroke1.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke1.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+
+    var gradientStroke2 = ctx2.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke2.addColorStop(1, 'rgba(20,23,39,0.2)');
+    gradientStroke2.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke2.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+
+    new Chart(ctx2, {
+      type: "line",
+      data: {
+        labels:  ["14-4", "15-4", "16-4", "17-4", "18-4", "19-4", "20-4", "21-4","22-4", "23-4", "24-4", "25-4", "26-4", "27-4", "28-4", "29-4"],
+        datasets: [{
+            label: "Zona 1",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#6f4e37",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [1,2,3,3,2,4,2,3,4,2,4,1,3,1,1,3],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 2 Sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#A569BD",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [1,2,2,1,2,2,2,3,1,2,2,1,2,2,2,3],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 3 Sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#F7464A",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [1,3,2,1,3,2,2,3,6,2,2,5,2,1,1,1],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 4 Sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#46BFBD",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [1,2,2,1,5,2,4,3,1,2,6,1,2,1,2,3],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 5 Sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#FEDCBA",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [0.5,1,1.5,2,2,2.5,4,5,0.5,1,1.5,2,2,2.5,4,5],
+            maxBarThickness: 6
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              padding: 10,
+              color: '#b2b9bf',
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              color: '#b2b9bf',
+              padding: 20,
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+        },
+      },
+    });
+
+
+    var ctx3 = document.getElementById("chart-line2").getContext("2d");
+
+    var gradientStroke3 = ctx3.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke3.addColorStop(1, 'rgba(203,12,159,0.2)');
+    gradientStroke3.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke3.addColorStop(0, 'rgba(203,12,159,0)'); //purple colors
+
+    var gradientStroke4 = ctx3.createLinearGradient(0, 230, 0, 50);
+
+    gradientStroke4.addColorStop(1, 'rgba(20,23,39,0.2)');
+    gradientStroke4.addColorStop(0.2, 'rgba(72,72,176,0.0)');
+    gradientStroke4.addColorStop(0, 'rgba(20,23,39,0)'); //purple colors
+
+    new Chart(ctx3, {
+      type: "line",
+      data: {
+        labels:  [{%for t in tiempos%}"{{t}}",{%endfor%}],
+        datasets: [
+        {
+            label: "Promedio refeer sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#000000",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [{%for a in avg%}{{a}},{%endfor%}],
+            maxBarThickness: 6
+          },
+          {
+            label: "Promedio refeer aire",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#000000",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [{%for a in avg2%}{{a}},{%endfor%}],
+            maxBarThickness: 6
+          },   
+        {
+            label: "Zona 1 Aire",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#6f4e37",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [{%for a in L1%}{{a}},{%endfor%}],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 2 Aire",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#A569BD",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [{%for a in L2%}{{a}},{%endfor%}],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 3 Sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#F7464A",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [{%for a in L3%}{{a}},{%endfor%}],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 4 Sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#46BFBD",
+            borderWidth: 3,
+            backgroundColor: gradientStroke1,
+            fill: true,
+            data: [{%for a in L4%}{{a}},{%endfor%}],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 5 Sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#FEDCBA",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [{%for a in L5%}{{a}},{%endfor%}],
+            maxBarThickness: 6
+          },
+          {
+            label: "Zona 6 Sustrato",
+            tension: 0.4,
+            borderWidth: 0,
+            pointRadius: 0,
+            borderColor: "#b2b9bf",
+            borderWidth: 3,
+            backgroundColor: gradientStroke2,
+            fill: true,
+            data: [{%for a in L6%}{{a}},{%endfor%}],
+            maxBarThickness: 6
+          },
+          
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
+        scales: {
+          y: {
+            grid: {
+              drawBorder: false,
+              display: true,
+              drawOnChartArea: true,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              padding: 10,
+              color: '#b2b9bf',
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+          x: {
+            grid: {
+              drawBorder: false,
+              display: false,
+              drawOnChartArea: false,
+              drawTicks: false,
+              borderDash: [5, 5]
+            },
+            ticks: {
+              display: true,
+              color: '#b2b9bf',
+              padding: 20,
+              font: {
+                size: 11,
+                family: "Open Sans",
+                style: 'normal',
+                lineHeight: 2
+              },
+            }
+          },
+        },
+      },
+    });
+    </script>
+<script>
+    (function() {
+      const container = document.getElementById("globe");
+      const canvas = container.getElementsByTagName("canvas")[0];
+
+      const globeRadius = 100;
+      const globeWidth = 4098 / 2;
+      const globeHeight = 1968 / 2;
+
+      function convertFlatCoordsToSphereCoords(x, y) {
+        let latitude = ((x - globeWidth) / globeWidth) * -180;
+        let longitude = ((y - globeHeight) / globeHeight) * -90;
+        latitude = (latitude * Math.PI) / 180;
+        longitude = (longitude * Math.PI) / 180;
+        const radius = Math.cos(longitude) * globeRadius;
+
+        return {
+          x: Math.cos(latitude) * radius,
+          y: Math.sin(longitude) * globeRadius,
+          z: Math.sin(latitude) * radius
+        };
+      }
+
+      function makeMagic(points) {
+        const {
+          width,
+          height
+        } = container.getBoundingClientRect();
+
+        // 1. Setup scene
+        const scene = new THREE.Scene();
+        // 2. Setup camera
+        const camera = new THREE.PerspectiveCamera(45, width / height);
+        // 3. Setup renderer
+        const renderer = new THREE.WebGLRenderer({
+          canvas,
+          antialias: true
+        });
+        renderer.setSize(width, height);
+        // 4. Add points to canvas
+        // - Single geometry to contain all points.
+        const mergedGeometry = new THREE.Geometry();
+        // - Material that the dots will be made of.
+        const pointGeometry = new THREE.SphereGeometry(0.5, 1, 1);
+        const pointMaterial = new THREE.MeshBasicMaterial({
+          color: "#989db5",
+        });
+
+        for (let point of points) {
+          const {
+            x,
+            y,
+            z
+          } = convertFlatCoordsToSphereCoords(
+            point.x,
+            point.y,
+            width,
+            height
+          );
+
+          if (x && y && z) {
+            pointGeometry.translate(x, y, z);
+            mergedGeometry.merge(pointGeometry);
+            pointGeometry.translate(-x, -y, -z);
+          }
+        }
+
+        const globeShape = new THREE.Mesh(mergedGeometry, pointMaterial);
+        scene.add(globeShape);
+
+        container.classList.add("peekaboo");
+
+        // Setup orbital controls
+        camera.orbitControls = new THREE.OrbitControls(camera, canvas);
+        camera.orbitControls.enableKeys = false;
+        camera.orbitControls.enablePan = false;
+        camera.orbitControls.enableZoom = false;
+        camera.orbitControls.enableDamping = false;
+        camera.orbitControls.enableRotate = true;
+        camera.orbitControls.autoRotate = true;
+        camera.position.z = -265;
+
+        function animate() {
+          // orbitControls.autoRotate is enabled so orbitControls.update
+          // must be called inside animation loop.
+          camera.orbitControls.update();
+          requestAnimationFrame(animate);
+          renderer.render(scene, camera);
+        }
+        animate();
+      }
+
+      function hasWebGL() {
+        const gl =
+          canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+        if (gl && gl instanceof WebGLRenderingContext) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+
+      function init() {
+        if (hasWebGL()) {
+          window
+          window.fetch("https://raw.githubusercontent.com/creativetimofficial/public-assets/master/soft-ui-dashboard-pro/assets/js/points.json")
+            .then(response => response.json())
+            .then(data => {
+              makeMagic(data.points);
+            });
+        }
+      }
+      init();
+    })();
+  </script>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script>
+  $( function() {
+    $( "#slider-range" ).slider({
+      range: true,
+      min: -10,
+      max: 100,
+      values: [ 12, 20 ],
+      slide: function( event, ui ) {
+        $( "#amount" ).val( "T" + ui.values[ 0 ] + " - T" + ui.values[ 1 ] );
+      }
+    });
+    $( "#amount" ).val( "T" + $( "#slider-range" ).slider( "values", 0 ) +
+      " - T" + $( "#slider-range" ).slider( "values", 1 ) );
+  } );
+  </script>
+    <script>
+      $( function() {
+        $( "#slider-range" ).slider({
+          range: true,
+          min: -10,
+          max: 100,
+          values: [ 12, 20 ],
+          slide: function( event, ui ) {
+            $( "#amount2" ).val( "T" + ui.values[ 0 ] + " - T" + ui.values[ 1 ] );
+          }
+        });
+        $( "#amount2" ).val( "T" + $( "#slider-range" ).slider( "values", 0 ) +
+          " - T" + $( "#slider-range" ).slider( "values", 1 ) );
+      } );
+      </script>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+  </script>
+
+{% endblock javascripts %}

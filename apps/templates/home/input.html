@@ -1,0 +1,33 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} Dashboard {% endblock title %}
+
+<!-- Specific CSS goes HERE -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block body_class %} g-sidenav-show bg-gray-100 {% endblock %}
+{% block content %}
+    <div>
+        <form method="POST" action = "">
+            {%csrf_token%}
+            lectura
+            <input type="number" name="temperatura">
+            sensor
+            <input type="number" name="sensor">
+            tierra = 1 aire = 0
+            <input type="number" name="tierra">
+            refeer
+            <input type="number" name="refeer">
+            <button type="submit">Enviar</button>
+        </form>
+    </div>
+{% include "includes/footer.html" %}
+
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}
+
+
+{% endblock javascripts %}
